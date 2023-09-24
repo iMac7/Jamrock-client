@@ -1,7 +1,8 @@
 'use client'
 import {useFetch} from "@/hooks/useFetch"
 import {MouseEvent, useEffect, useRef, useState} from "react"
-import {SERVER_URI} from '@/utils/urls'
+import {SERVER_URL} from '@/utils/urls'
+import { useRouter } from "next/navigation"
 
 type Props = {
     name: string
@@ -11,34 +12,41 @@ type User = {
   email: string,
   username?: string,
   password: string,
-  confirm_password?: string
 }
 
 export default function AuthForm({name}: Props) {
+  const router = useRouter()
   const passwordref = useRef<HTMLInputElement | null>(null)
   const [shouldFetch, setShouldFetch] = useState(false)
   const [body, setBody] = useState(null)
 
-  const user: User = {
+  const user: User = 
+  name === 'Sign Up'?
+  {
+    username: 'admin',
     email: 'user1@gmail.com',
     password: passwordref.current?.value || ''
   }
-
-  const url = `${SERVER_URI}/auth/signup`
-
-  const {isLoading, error, data} = useFetch({shouldFetch, method: 'POST', url, body: user})  
-
-  useEffect(() => {
-    if(error!==null || data!==null) {
-      setShouldFetch(false)
-    }
-  }, [error, data, shouldFetch])
-  
-  function handleClick(e: MouseEvent<HTMLElement>) {
-    e.preventDefault()
-    setShouldFetch(true)
+  : 
+  {
+    username: 'admin',
+    email: 'user1@gmail.com',
+    password: '12345'
   }
 
+
+  const url = `${SERVER_URL}/auth/${name==='Sign Up'? 'signup' : 'signin'}`
+
+  const {fetchData, isLoading, error, data} = useFetch({method: 'POST', url, body: user}) 
+
+  useEffect(() => {
+    if(data!==null) {
+      const user = JSON.stringify(data)
+      localStorage.setItem('user', user)
+      router.push('/')
+    }
+  }, [data])
+  
 
   return (
     <form className="border-2 border-gray-400 rounded-lg w-[300px] absolute top-4 left-0 translate-x-[50%] p-4 flex flex-col gap-4">
@@ -74,7 +82,7 @@ export default function AuthForm({name}: Props) {
       
         <button 
           className="bg-black text-white active:bg-gray-500 p-2"
-          onClick={handleClick}
+          onClick={e=> {e.preventDefault(); fetchData()}}
         >SEND</button>
 
     </form>

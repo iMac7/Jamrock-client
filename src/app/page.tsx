@@ -1,14 +1,30 @@
-'use client'
-import Image from 'next/image'
-import { useState } from 'react'
+"use client"
+import Featured from "@/components/Home/Featured"
+import Productslist from "@/components/Home/Productslist"
+import DesktopNav from "@/components/Nav/DesktopNav"
+import { motion } from "framer-motion"
 
 
 export default function Home() {
-  const [first, setfirst] = useState(0)
   
   return (
-    <main>
-      home
-    </main>
+    <>
+    <motion.div
+    key={window.location.pathname}
+    initial={{ x: 300, opacity: 0 }}
+    animate={{ x: 0, opacity: 1 }}
+    exit={{ x: 300, opacity: 0 }}
+    transition={{
+      type: "spring",
+      stiffness: 260,
+      damping: 20,
+    }}>
+      <Productslist />
+
+    </motion.div>
+    </>
+
+
   )
+  
 }

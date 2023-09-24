@@ -1,24 +1,29 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
+import { useCredentials } from "./useCredentials"
 
 type params = {
-  shouldFetch: boolean
   url: string
   method: "GET" | "POST" | "PUT" | "PATCH"
   body?: null | {}
   config?: {}
 }
 
-export function useFetch({ shouldFetch, method, url, body, config }: params) {
-  const [isLoading, setIsLoading] = useState(true)
+export function useFetch({ method, url, body, config }: params) {
+  // const {token} = useCredentials()
+
+  const [isLoading, setIsLoading] = useState(false)
   const [error, seterror] = useState<null | {}>(null)
   const [data, setData] = useState<null | []>(null)
 
+  const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InVzZXIxQGdtYWlsLmNvbSIsImlkIjoiMTEiLCJpYXQiOjE2OTQ1MzU0MTIsImV4cCI6MTcwNDUzNTQxMn0.Jwyipx3zL9D0RBHk79qN-HEUHqURrmyQe8ZaspRYdY0'
+
   function fetchData() {
-    console.log('fetch running')
+    setIsLoading(true)
+
     if (method === "GET") {
       return axios
-        .get(url)
+        .get(url, {headers: {Authorization: token}})
         .then((res) => setData(res.data))
         .catch((err) => seterror(err))
         .finally(() => setIsLoading(false))
@@ -49,11 +54,5 @@ export function useFetch({ shouldFetch, method, url, body, config }: params) {
     }
   }
 
-  useEffect(() => {
-    if (shouldFetch) {
-      fetchData()
-    }
-  }, [shouldFetch, url, JSON.stringify(body)])
-
-  return { isLoading, error, data }
+  return {fetchData, isLoading, error, data }
 }
